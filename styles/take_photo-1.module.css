@@ -1,0 +1,71 @@
+.page,
+.page * {
+  box-sizing: border-box;
+}
+
+.page {
+  background: #ffffff;
+  height: 982px;
+  position: relative;
+  overflow: hidden;
+}
+
+.photoView {
+  position: relative;
+  border-radius: 20px;
+  border-style: solid;
+  border-color: #333333;
+  border-width: 10px;
+  width: 400px;
+  height: 520px;
+  margin: 183px auto 0;
+  overflow: hidden;
+}
+
+.video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.buttonWrapper {
+  display: block;
+  background: #3832e9;
+  border-radius: 50px;
+  width: 253.19px;
+  height: 81px;
+  margin: 3em auto;
+}
+
+.buttonText {
+  color: #ffffff;
+  text-align: center;
+  font-family: "Pretendard-SemiBold", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  width: 254px;
+  height: 81px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.errorText {
+  color: #d32f2f;
+  text-align: center;
+  margin-top: 12px;
+  font-size: 14px;
+}

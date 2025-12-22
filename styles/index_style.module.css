@@ -1,0 +1,248 @@
+.div {
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  height: 1080px;
+  position: relative;
+  overflow: hidden;
+}
+
+.div2 {
+  flex-shrink: 0;
+  width: 1920px;
+  height: 1080px;
+  position: relative;
+}
+
+.rectangle-1 {
+  background: #353535;
+  width: 100%;
+  height: 27.6%;
+  position: absolute;
+  bottom: 0%;
+  top: 72.4%;
+}
+
+.dk-photo-1 {
+  width: 100%;
+  height: 902.11px;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  top: 0px;
+  object-fit: cover;
+  aspect-ratio: 1920/902.11;
+}
+
+.div3 {
+  flex-shrink: 0;
+  width: 1637px;
+  height: 589px;
+  position: absolute;
+  left: 159px;
+  top: 72px;
+}
+
+.blue {
+  opacity: 0.5;
+  width: 17.81%;
+  height: 431.58px;
+  position: absolute;
+  right: 71.97%;
+  left: 10.22%;
+  top: 271.79px;
+  transform-origin: 0 0;
+  transform: rotate(-30deg) scale(1, 1);
+  object-fit: cover;
+  aspect-ratio: 291.58/431.58;
+}
+
+.dankook-b {
+  opacity: 0.5;
+  width: 17.81%;
+  height: 431.58px;
+  position: absolute;
+  right: 42.06%;
+  left: 40.13%;
+  top: 0px;
+  transform-origin: 0 0;
+  transform: rotate(30deg) scale(1, 1);
+  object-fit: cover;
+  aspect-ratio: 291.58/431.58;
+}
+
+.dankook-w {
+  opacity: 0.6;
+  width: 17.78%;
+  height: 430.74px;
+  position: absolute;
+  right: 43.43%;
+  left: 38.79%;
+  top: 237.51px;
+  transform-origin: 0 0;
+  transform: rotate(-30deg) scale(1, 1);
+  object-fit: cover;
+  aspect-ratio: 291.02/430.74;
+}
+
+.dwyl {
+  opacity: 0.5;
+  width: 17.81%;
+  height: 431.58px;
+  position: absolute;
+  right: 11.86%;
+  left: 70.33%;
+  top: 7px;
+  transform-origin: 0 0;
+  transform: rotate(30deg) scale(1, 1);
+  object-fit: cover;
+  aspect-ratio: 291.58/431.58;
+}
+
+.green {
+  opacity: 0.5;
+  width: 17.81%;
+  height: 431.58px;
+  position: absolute;
+  right: 69.01%;
+  left: 13.18%;
+  top: 36px;
+  transform-origin: 0 0;
+  transform: rotate(30deg) scale(1, 1);
+  object-fit: cover;
+  aspect-ratio: 291.58/431.58;
+}
+
+.seoulddp {
+  opacity: 0.5;
+  width: 17.81%;
+  height: 431.58px;
+  position: absolute;
+  right: 10.8%;
+  left: 71.39%;
+  top: 235.79px;
+  transform-origin: 0 0;
+  transform: rotate(-30deg) scale(1, 1);
+  object-fit: cover;
+  aspect-ratio: 291.58/431.58;
+}
+
+._1 {
+  flex-shrink: 0;
+  width: 432px;
+  height: 206px;
+  position: absolute;
+  left: 742px;
+  top: 840px;
+}
+
+.rectangle-5 {
+  background: #ffffff;
+  border-radius: 50px;
+  width: 48.68%;
+  height: 27.18%;
+  position: absolute;
+  right: 26.69%;
+  left: 24.63%;
+  bottom: 13.85%;
+  top: 58.97%;
+}
+
+.div4 {
+  color: #ffffff;
+  text-align: center;
+  font-family: "Pretendard-Bold", sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  width: 100%;
+  bottom: 59.57%;
+  top: 0%;
+  height: 40.43%;
+}
+
+.dksh-noid-four-cut {
+  color: #ffffff;
+  text-align: center;
+  font-family: "Pretendard-Light", sans-serif;
+  font-size: 20px;
+  font-weight: 300;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  width: 100%;
+  bottom: 44.57%;
+  top: 25.64%;
+  height: 29.79%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.div5 {
+  color: #000000;
+  text-align: center;
+  font-family: "Pretendard-SemiBold", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  position: absolute;
+  right: 26.69%;
+  left: 24.63%;
+  width: 48.68%;
+  bottom: 13.85%;
+  top: 58.97%;
+  height: 27.18%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.div6 {
+  flex-shrink: 0;
+  width: 1815px;
+  height: 726px;
+  position: absolute;
+  left: 56px;
+  top: 39px;
+}
+
+.make-your-4-cuts {
+  color: #000000;
+  text-align: center;
+  font-family: "Pretendard-Thin", sans-serif;
+  font-size: 64px;
+  font-weight: 100;
+  position: absolute;
+  right: 59.4%;
+  left: 0%;
+  width: 40.6%;
+  bottom: 0%;
+  top: 86.84%;
+  height: 13.16%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+._2025-a-t {
+  color: #000000;
+  text-align: center;
+  font-family: "Pretendard-Thin", sans-serif;
+  font-size: 64px;
+  font-weight: 100;
+  position: absolute;
+  right: 0%;
+  left: 62%;
+  width: 50%;
+  bottom: 86.84%;
+  top: 0%;
+  height: 13.16%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
