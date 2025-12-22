@@ -9,14 +9,14 @@ export default function NSelect() {
         <meta charSet="UTF-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>나만의 프레임</title>
+        <title>교장님 프레임</title>
       </Head>
 
       <div className={styles.div}>
         <div className={styles["rectangle-2"]}></div>
 
         <div className={styles["original-text"]}>
-          <div className={styles.div3}>올 한 해를 정리하는 한 줄!</div>
+          <div className={styles.div3}>교장님과의 한컷!</div>
           <div className={styles.original}>프레임을 선택해보세요.</div>
         </div>
 
