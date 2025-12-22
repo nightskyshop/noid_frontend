@@ -145,7 +145,7 @@ export default function Frame() {
                 window.location.href = "/n_select";
               }}
             >
-              나만의 프레임
+              교장님 프레임
             </div>
             <div
               className={styles.original}
