@@ -153,7 +153,7 @@ export default function Frame() {
                 window.location.href = "/n_select";
               }}
             >
-              Memo →
+              Waiting →
             </div>
           </div>
         </div>
