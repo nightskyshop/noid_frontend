@@ -84,7 +84,7 @@ export default async function handler(req, res) {
     );
 
     // 🔹 QR 생성
-    const qrLink = `http://localhost:8000/download?session=${session}`;
+    const qrLink = `http://dankook.noid.my/download?session=${session}`;
     const qrfile = await QRCode.toDataURL(qrLink, {
       margin: 4,
       width: 400,
@@ -113,7 +113,7 @@ export default async function handler(req, res) {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/upload?password=8krybwTfjJEIFq8J50CfEJlyFMlxYNl04pZDcgXKPz8pY3E362",
+        "http://dankook.noid.my/upload?password=8krybwTfjJEIFq8J50CfEJlyFMlxYNl04pZDcgXKPz8pY3E362",
         form,
         {
           headers: {

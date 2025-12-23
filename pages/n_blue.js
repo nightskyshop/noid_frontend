@@ -52,7 +52,7 @@ export default function NBlue() {
         </div>
 
         <div className={styles.div6}>
-          <div className={styles.blue3}>Memo</div>
+          <div className={styles.blue3}>Waiting</div>
         </div>
       </div>
     </>
