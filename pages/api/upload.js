@@ -4,10 +4,14 @@ import { open } from "sqlite";
 import formidable from "formidable";
 import fs from "fs";
 import fsPromises from "fs/promises";
-import QRCode from "qrcode";
+// QR 코드(갤러리 다운로드 링크) 비활성화로 미사용
+// import QRCode from "qrcode";
 import sharp from "sharp";
-import FormData from "form-data";
-import axios from "axios";
+// [사진 자동 출력] 실험적 기능 — 제거 시 이 import 와 아래 블록만 삭제
+import { printPhoto } from "../../lib/printer";
+// 노이드 갤러리(pythonanywhere) 업로드 비활성화로 아래 모듈은 현재 미사용
+// import FormData from "form-data";
+// import axios from "axios";
 
 export const config = {
   api: {
@@ -24,8 +28,9 @@ export default async function handler(req, res) {
   try {
     const { fields, files } = await parseForm(req);
     const session = fields.session?.[0];
-    const upload = fields.upload?.[0];
-    const uploadToGallery = upload === "true";
+    // 갤러리 업로드 비활성화로 미사용
+    // const upload = fields.upload?.[0];
+    // const uploadToGallery = upload === "true";
 
     if (!session) {
       return res.status(400).json({
@@ -83,55 +88,66 @@ export default async function handler(req, res) {
       session
     );
 
-    // 🔹 QR 생성
-    const qrLink = `http://dankook.noid.my/download?session=${session}`;
-    const qrfile = await QRCode.toDataURL(qrLink, {
-      margin: 4,
-      width: 400,
-    });
+    // ===== QR 생성(갤러리 다운로드 링크) 비활성화 =====
+    // const qrLink = `https://dkshnoid.pythonanywhere.com/download?session=${session}`;
+    // const qrfile = await QRCode.toDataURL(qrLink, {
+    //   margin: 4,
+    //   width: 400,
+    // });
+    // ===== QR 생성 비활성화 끝 =====
 
-    await saveBase64AsPng(photofile, session);
+    const savedPath = await saveBase64AsPng(photofile, session);
 
+    // ===== [사진 자동 출력] 실험적 기능 — 제거 시 이 블록만 삭제 =====
+    // PRINT_ENABLED=true 일 때만 동작. 실패해도 업로드 응답을 막지 않음(fire-and-forget).
+    printPhoto(savedPath).catch((e) =>
+      console.error("[printer] 자동 출력 오류:", e?.message)
+    );
+    // ===== [사진 자동 출력] 끝 =====
+
+    // 로컬 동작: QR 없이 photofile 만 저장
     await db.run(
-      `UPDATE photo_sessions SET qrfile = ?, photofile = ? WHERE id = ?`,
-      qrfile,
+      `UPDATE photo_sessions SET photofile = ? WHERE id = ?`,
       photofile,
       session
     );
 
-    const outputDir = path.join(process.cwd(), "images");
-    const filePath = path.join(outputDir, `${session}.png`);
+    // ===== 노이드 갤러리(pythonanywhere) 업로드 비활성화 =====
+    // 아래 블록은 합성된 사진을 외부 갤러리 서버로 전송하는 부분으로, 전체 주석 처리함.
+    // const outputDir = path.join(process.cwd(), "images");
+    // const filePath = path.join(outputDir, `${session}.png`);
 
-    const form = new FormData();
-    form.append("file", fs.createReadStream(filePath), {
-      filename: `${session}.png`,
-      contentType: "image/png",
-    });
-    form.append("upload", uploadToGallery ? "true" : "false");
+    // const form = new FormData();
+    // form.append("file", fs.createReadStream(filePath), {
+    //   filename: `${session}.png`,
+    //   contentType: "image/png",
+    // });
+    // form.append("upload", uploadToGallery ? "true" : "false");
 
-    console.log(form);
+    // console.log(form);
 
-    try {
-      const response = await axios.post(
-        "http://dankook.noid.my/upload?password=8krybwTfjJEIFq8J50CfEJlyFMlxYNl04pZDcgXKPz8pY3E362",
-        form,
-        {
-          headers: {
-            ...form.getHeaders(), // boundary 포함된 Content-Type
-          },
-          maxBodyLength: Infinity,
-        }
-      );
+    // try {
+    //   const response = await axios.post(
+    //     "https://dkshnoid.pythonanywhere.com/upload?password=8krybwTfjJEIFq8J50CfEJlyFMlxYNl04pZDcgXKPz8pY3E362",
+    //     form,
+    //     {
+    //       headers: {
+    //         ...form.getHeaders(), // boundary 포함된 Content-Type
+    //       },
+    //       maxBodyLength: Infinity,
+    //     }
+    //   );
 
-      console.log("업로드 서버 응답:", response.status, response.data);
-    } catch (e) {
-      console.error("업로드 서버 전송 오류:", e.response?.data || e.message);
-    }
+    //   console.log("업로드 서버 응답:", response.status, response.data);
+    // } catch (e) {
+    //   console.error("업로드 서버 전송 오류:", e.response?.data || e.message);
+    // }
+    // ===== 갤러리 업로드 비활성화 끝 =====
 
     return res.status(200).json({
       result: true,
       message: "성공적으로 이미지를 업로드하였습니다.",
-      qrcode: qrfile,
+      // qrcode: qrfile, // QR 비활성화
       photo: photofile,
     });
   } catch (e) {
