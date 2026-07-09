@@ -15,7 +15,7 @@ export default function DdpDwyl() {
   return (
     <>
       <Head>
-        <title>단원진로학술제 프레임</title>
+        <title>서울진로진학박람회 프레임</title>
         <meta charSet="UTF-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />

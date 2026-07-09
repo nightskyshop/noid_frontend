@@ -88,7 +88,7 @@ export default function Home() {
           </div>
           <div className={styles.div6}>
             <div className={styles["make-your-4-cuts"]}>MAKE YOUR 4CUTS</div>
-            <div className={styles["_2025-a-t"]}>2025 단원진로학술제</div>
+            <div className={styles["_2025-a-t"]}>2026 서울진로진학박람회</div>
           </div>
         </div>
       </div>

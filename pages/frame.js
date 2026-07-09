@@ -83,7 +83,7 @@ export default function Frame() {
                 window.location.href = "/ddp_select";
               }}
             >
-              2025
+              2026
             </div>
             <div
               className={styles.div5}
@@ -91,7 +91,7 @@ export default function Frame() {
                 window.location.href = "/ddp_select";
               }}
             >
-              단원진로학술제
+              서울진로진학박람회
             </div>
             <div
               className={styles.ddp}
