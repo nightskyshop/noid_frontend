@@ -247,8 +247,7 @@ export default function TakeSelectPhoto() {
       return;
     }
 
-    const uploadToGallery = confirm("노이드 갤러리에 사진을 업로드할까요?");
-    runUpload(uploadToGallery);
+    runUpload(false);
   }, [status, selectedIndexes, runUpload]);
 
   const handleCancel = useCallback(() => {
