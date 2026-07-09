@@ -44,6 +44,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  white-space: nowrap;
 }
 
 .dankook-b {
@@ -140,6 +141,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  white-space: nowrap;
 }
 
 .ddp {
@@ -216,6 +218,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  white-space: nowrap;
 }
 
 .original {
