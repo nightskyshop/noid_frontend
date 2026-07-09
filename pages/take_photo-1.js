@@ -2,7 +2,7 @@ import Head from "next/head";
 import { useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import styles from "../styles/take_photo-1.module.css";
-import Snowfall from "react-snowfall";
+// import Snowfall from "react-snowfall";
 
 export default function TakePhoto1() {
   const router = useRouter();
@@ -67,7 +67,7 @@ export default function TakePhoto1() {
       </Head>
 
       <div className={styles.page}>
-        <Snowfall color="#82C3D9" />
+        {/* <Snowfall color="#82C3D9" /> */}
         <div className={styles.photoView}>
           <video
             className={styles.video}

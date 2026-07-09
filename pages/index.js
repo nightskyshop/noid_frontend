@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/index_style.module.css";
-import Snowfall from "react-snowfall";
+// import Snowfall from "react-snowfall";
 
 export default function Home() {
   return (
@@ -14,7 +14,7 @@ export default function Home() {
       </Head>
 
       <div className={styles.div}>
-        <Snowfall color="#82C3D9" />
+        {/* <Snowfall color="#82C3D9" /> */}
         <div className="content-wrapper">
           <div className={styles.div2}>
             <div className={styles["rectangle-1"]}></div>

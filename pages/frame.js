@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/frame_style.module.css";
-import Snowfall from "react-snowfall";
+// import Snowfall from "react-snowfall";
 
 export default function Frame() {
   return (
@@ -13,7 +13,7 @@ export default function Frame() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       <div className={styles.div}>
-        <Snowfall color="#82C3D9" />
+        {/* <Snowfall color="#82C3D9" /> */}
         <div className={styles.div2}>
           <div className={styles.div3}>
             {/* NOID 프레임 영역 */}

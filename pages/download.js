@@ -2,7 +2,7 @@ import Head from "next/head";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import styles from "../styles/download.module.css";
-import Snowfall from "react-snowfall";
+// import Snowfall from "react-snowfall";
 
 export default function DownloadPage() {
   const router = useRouter();
@@ -55,7 +55,7 @@ export default function DownloadPage() {
       </Head>
 
       <div className={styles.about}>
-        <Snowfall color="#82C3D9" />
+        {/* <Snowfall color="#82C3D9" /> */}
         <div className={styles.notificationBar}>
           {countdown}초 후 자동으로 닫힙니다
         </div>

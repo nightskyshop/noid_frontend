@@ -2,7 +2,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { useState } from "react";
 import styles from "../styles/noid_dankook_b.module.css";
-import Snowfall from "react-snowfall";
+// import Snowfall from "react-snowfall";
 
 export default function NoidDankookB() {
   const goSelectFrame = () => {
@@ -22,7 +22,7 @@ export default function NoidDankookB() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       <div className={styles["dankook-b"]}>
-        <Snowfall color="#82C3D9" />
+        {/* <Snowfall color="#82C3D9" /> */}
         <div className={styles.rectangle - 2}></div>
 
         <div className={styles.div}>

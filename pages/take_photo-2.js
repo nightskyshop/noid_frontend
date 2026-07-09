@@ -2,7 +2,7 @@ import Head from "next/head";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import styles from "../styles/take_photo-2.module.css";
-import Snowfall from "react-snowfall";
+// import Snowfall from "react-snowfall";
 
 export default function TakePhoto2() {
   const router = useRouter();
@@ -300,7 +300,7 @@ export default function TakePhoto2() {
       </Head>
 
       <div className={styles.page}>
-        <Snowfall color="#82C3D9" />
+        {/* <Snowfall color="#82C3D9" /> */}
         <div ref={flashRef} className={styles.flash} />
 
         <div className={styles.counter}>{counterText}</div>

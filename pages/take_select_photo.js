@@ -2,7 +2,7 @@ import Head from "next/head";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import styles from "../styles/take_select_photo.module.css";
-import Snowfall from "react-snowfall";
+// import Snowfall from "react-snowfall";
 
 // ===== 업로드 예외 처리 설정 =====
 const UPLOAD_TIMEOUT_MS = 90000; // 한 번의 시도 제한 시간 (느린 WiFi 대비)
@@ -274,7 +274,7 @@ export default function TakeSelectPhoto() {
       </Head>
 
       <div className={styles.page}>
-        <Snowfall color="#82C3D9" />
+        {/* <Snowfall color="#82C3D9" /> */}
 
         {/* 오프라인 배너 */}
         {!isOnline && (
