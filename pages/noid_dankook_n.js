@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
-import { useState } from "react";
 import styles from "../styles/noid_dankook_n.module.css";
+import CopiesSelector from "../components/CopiesSelector";
 // import Snowfall from "react-snowfall";
 
 export default function NoidDankookN() {
@@ -24,6 +24,7 @@ export default function NoidDankookN() {
 
       <div className={styles["dankook-n"]}>
         {/* <Snowfall color="#82C3D9" /> */}
+        <CopiesSelector />
 
         <div className={styles.div}>
           <div className={styles.div2}>

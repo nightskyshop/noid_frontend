@@ -28,6 +28,8 @@ export default async function handler(req, res) {
   try {
     const { fields, files } = await parseForm(req);
     const session = fields.session?.[0];
+    // 인쇄 매수 (프레임 선택 화면에서 고른 값, 1~4, 기본 1)
+    const copies = Math.min(4, Math.max(1, parseInt(fields.copies?.[0] || "1", 10) || 1));
     // 갤러리 업로드 비활성화로 미사용
     // const upload = fields.upload?.[0];
     // const uploadToGallery = upload === "true";
@@ -99,8 +101,8 @@ export default async function handler(req, res) {
     const savedPath = await saveBase64AsPng(photofile, session);
 
     // ===== [사진 자동 출력] 실험적 기능 — 제거 시 이 블록만 삭제 =====
-    // PRINT_ENABLED=true 일 때만 동작. 실패해도 업로드 응답을 막지 않음(fire-and-forget).
-    printPhoto(savedPath).catch((e) =>
+    // 선택한 매수(copies)만큼 출력. 실패해도 업로드 응답을 막지 않음(fire-and-forget).
+    printPhoto(savedPath, { copies }).catch((e) =>
       console.error("[printer] 자동 출력 오류:", e?.message)
     );
     // ===== [사진 자동 출력] 끝 =====
@@ -165,6 +167,16 @@ export default async function handler(req, res) {
 /* =========================
    image.create() JS 버전
 ========================= */
+
+// 인쇄 용지 크기(102x152mm = 4x6in)에 정확히 대응하는 픽셀 크기(300dpi 기준).
+// 프레임마다 실제 합성 크기가 조금씩 달라(예: 1200x1800 vs 1181x1748) 그대로
+// 출력하면 프린터 드라이버가 비율을 다르게 채우면서 오른쪽/아래가 잘릴 수 있다.
+// 저장 직전에 모든 프레임을 이 크기로 통일(레터박스)해 두면 드라이버의 크롭/채우기
+// 동작에 의존하지 않고 항상 정확히 용지에 맞아 잘리지 않는다.
+const PRINT_WIDTH_PX = 1200; // 4in * 300dpi
+const PRINT_HEIGHT_PX = 1800; // 6in * 300dpi
+const PRINT_DPI = 300;
+
 async function createImage(data, frameName, session) {
   const framePath = path.join(
     process.cwd(),
@@ -193,7 +205,19 @@ async function createImage(data, frameName, session) {
     top: coordinates[i].top,
   }));
 
-  const outputBuffer = await frame.composite(composites).png().toBuffer();
+  const composedBuffer = await frame.composite(composites).png().toBuffer();
+
+  // 최종 인쇄용 크기(1200x1800px = 4x6in @300dpi)로 통일 + DPI 메타데이터 명시.
+  // fit:"contain" 은 비율을 유지한 채 캔버스 안에 전체 이미지를 담아(레터박스),
+  // 잘라내지(crop) 않는다. 프레임이 이미 1200x1800 이면 사실상 그대로 유지된다.
+  const outputBuffer = await sharp(composedBuffer)
+    .resize(PRINT_WIDTH_PX, PRINT_HEIGHT_PX, {
+      fit: "contain",
+      background: { r: 255, g: 255, b: 255, alpha: 1 },
+    })
+    .withMetadata({ density: PRINT_DPI })
+    .png()
+    .toBuffer();
 
   return outputBuffer.toString("base64");
 }

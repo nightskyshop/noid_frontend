@@ -80,10 +80,13 @@ export default function TakeSelectPhoto() {
   const abortRef = useRef(null); // 현재 진행 중 업로드 중단 함수
   const cancelledRef = useRef(false); // 사용자가 취소했는지
 
+  // localStorage 는 서버에 없으므로 SSR 결과(빈 배열)와 첫 클라이언트 렌더를
+  // 일치시킨 뒤 마운트 후에만 읽어야 하이드레이션 불일치가 생기지 않는다.
   useEffect(() => {
     const storedPhotos = JSON.parse(
       localStorage.getItem("capturedPhotos") || "[]"
     );
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPhotos(storedPhotos);
   }, []);
 
@@ -145,6 +148,8 @@ export default function TakeSelectPhoto() {
       const formData = new FormData();
       formData.append("session", localStorage.getItem("session"));
       formData.append("upload", String(uploadToGallery));
+      // 프레임 선택 화면에서 고른 인쇄 매수 (없으면 1)
+      formData.append("copies", localStorage.getItem("printCopies") || "1");
       selectedPhotos.forEach((base64, index) => {
         const file = base64toFile(base64, `photo${index + 1}.png`);
         formData.append(`photo${index + 1}`, file);

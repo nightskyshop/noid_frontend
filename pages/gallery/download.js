@@ -1,5 +1,6 @@
 // Flask app.py의 /download (download.html) 포팅 — QR 스캔 후 사진 다운로드 페이지
 import Head from "next/head";
+import Link from "next/link";
 import { getGalleryDb } from "../../lib/galleryDb";
 import { imagePath } from "../../lib/galleryDb";
 import fs from "fs";
@@ -65,9 +66,9 @@ export default function Download({ session }) {
         >
           다운로드
         </a>
-        <a className="button" href="/gallery">
+        <Link className="button" href="/gallery">
           다른 사진 보기
-        </a>
+        </Link>
       </div>
     </>
   );

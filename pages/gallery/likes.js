@@ -1,5 +1,6 @@
 // Flask app.py의 /likes (likes.html) 포팅 — 인기 사진 랭킹
 import Head from "next/head";
+import Link from "next/link";
 import { useEffect } from "react";
 import { getGalleryDb } from "../../lib/galleryDb";
 
@@ -155,9 +156,9 @@ export default function Likes({ photos, page, totalPages }) {
       </h1>
 
       <div className="top-buttons">
-        <a href="/gallery" className="back-button">
+        <Link href="/gallery" className="back-button">
           ← 전체 목록으로
-        </a>
+        </Link>
       </div>
 
       <div className="gallery">

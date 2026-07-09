@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
-import { useState } from "react";
 import styles from "../styles/n_blue.module.css";
+import CopiesSelector from "../components/CopiesSelector";
 
 export default function NBlue() {
   const goSelectFrame = () => {
@@ -22,6 +22,7 @@ export default function NBlue() {
       </Head>
 
       <div className={styles.blue}>
+        <CopiesSelector />
         <div className={styles["rectangle-2"]}></div>
 
         <div className={styles.div2}>

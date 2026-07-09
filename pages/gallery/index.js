@@ -1,5 +1,6 @@
 // Flask app.py의 "/" (index.html) 포팅 — 사진 갤러리
 import Head from "next/head";
+import Link from "next/link";
 import { useEffect } from "react";
 import { getGalleryDb } from "../../lib/galleryDb";
 
@@ -154,9 +155,9 @@ export default function Gallery({ photos, page, totalPages }) {
       </h1>
 
       <div className="top-buttons">
-        <a href="/gallery/likes" className="like-button">
+        <Link href="/gallery/likes" className="like-button">
           ❤️ 좋아요 순 보기
-        </a>
+        </Link>
       </div>
 
       <div className="gallery">
