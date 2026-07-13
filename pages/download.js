@@ -8,11 +8,11 @@ export default function DownloadPage() {
   const router = useRouter();
   const { session } = router.query;
 
-  const [photo, setPhoto] = useState(null);
+  const [ready, setReady] = useState(false);
   const [qr, setQr] = useState(null);
   const [countdown, setCountdown] = useState(30);
 
-  /** DB에서 데이터 가져오기 */
+  /** 세션 유효성 확인 (사진은 파일 URL 로 직접 로드) */
   useEffect(() => {
     if (!session) return;
 
@@ -22,8 +22,8 @@ export default function DownloadPage() {
         if (!res.ok) throw new Error("접근 불가");
 
         const data = await res.json();
-        setPhoto(data.selected_photo);
         setQr(data.qr_code);
+        setReady(true);
       } catch (err) {
         console.error(err);
         router.replace("/forbidden");
@@ -70,10 +70,10 @@ export default function DownloadPage() {
           </div>
         )}
 
-        {photo && (
+        {ready && (
           <div className={styles.mb6}>
             <img
-              src={`data:image/png;base64,${photo}`}
+              src={`/api/gallery/get_image?session=${session}`}
               alt="Selected Photo"
               className={styles.photo}
             />

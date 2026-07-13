@@ -146,11 +146,11 @@ export default async function handler(req, res) {
     // }
     // ===== 갤러리 업로드 비활성화 끝 =====
 
+    // 합성 이미지(photofile)는 크기가 커서 응답에 담지 않는다(4MB 초과 방지).
+    // 클라이언트는 session 으로 /download 로 이동해 파일 URL 로 이미지를 불러온다.
     return res.status(200).json({
       result: true,
       message: "성공적으로 이미지를 업로드하였습니다.",
-      // qrcode: qrfile, // QR 비활성화
-      photo: photofile,
     });
   } catch (e) {
     console.error("upload error:", e);

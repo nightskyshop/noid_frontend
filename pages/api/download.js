@@ -20,8 +20,10 @@ export default async function handler(req, res) {
   try {
     db = await getDb();
 
+    // photofile(합성 이미지 base64)은 크기가 커서 응답에 담지 않는다(4MB 초과 방지).
+    // 실제 사진은 파일 스트리밍 엔드포인트(/api/gallery/get_image)로 불러온다.
     const row = await db.get(
-      "SELECT qrfile, photofile FROM photo_sessions WHERE id = ? LIMIT 1",
+      "SELECT qrfile FROM photo_sessions WHERE id = ? LIMIT 1",
       session
     );
 
@@ -35,7 +37,6 @@ export default async function handler(req, res) {
     return res.status(200).json({
       result: true,
       qr_code: row.qrfile,
-      selected_photo: row.photofile,
     });
   } catch (e) {
     console.error("download error:", e);
