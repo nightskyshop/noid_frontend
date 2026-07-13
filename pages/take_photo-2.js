@@ -115,7 +115,7 @@ export default function TakePhoto2() {
 
     const currentIndex = photosTakenRef.current;
     if (currentIndex >= 6) {
-      setCounterText("촬영 완료! 저장 중...");
+      setCounterText("촬영 완료!");
       localStorage.setItem(
         "capturedPhotos",
         JSON.stringify(capturedPhotosRef.current)
@@ -180,7 +180,7 @@ export default function TakePhoto2() {
         nextCount
       );
     } else {
-      setCounterText("촬영 완료! 저장 중...");
+      setCounterText("촬영 완료!");
       localStorage.setItem(
         "capturedPhotos",
         JSON.stringify(capturedPhotosRef.current)
@@ -284,6 +284,27 @@ export default function TakePhoto2() {
     scriptReady,
     takePhoto,
   ]);
+
+  // 촬영이 끝나면(6장 저장 완료) CPU 부하가 큰 얼굴 인식 루프와 카메라를 즉시 멈춘다.
+  // 이걸 계속 돌리면 "저장 중" 화면에서 페이지가 멈춘 것처럼 보이고 버튼도 잘 안 눌린다.
+  // 정지 후 다음 페이지(사진 선택)로 자동 이동한다.
+  useEffect(() => {
+    if (!buttonActive) return;
+
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+
+    const id = setTimeout(() => {
+      router.push("/take_select_photo");
+    }, 1000);
+    return () => clearTimeout(id);
+  }, [buttonActive, router]);
 
   const handleContinue = useCallback(() => {
     if (!buttonActive) return;
