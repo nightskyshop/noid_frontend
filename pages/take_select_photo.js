@@ -4,22 +4,15 @@ import { useRouter } from "next/router";
 import styles from "../styles/take_select_photo.module.css";
 // import Snowfall from "react-snowfall";
 
-// ===== 업로드 예외 처리 설정 =====
-const UPLOAD_TIMEOUT_MS = 90000; // 한 번의 시도 제한 시간 (느린 WiFi 대비)
-const MAX_AUTO_RETRIES = 3; // 자동 재시도 횟수
-const RETRY_BACKOFF_MS = [1500, 3000, 5000]; // 각 재시도 전 대기(백오프)
-
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
 /**
- * XHR 기반 업로드 — fetch 와 달리 업로드 진행률/타임아웃/중단을 지원.
- * 실패 시 { type, status, message } 형태로 reject.
+ * XHR 기반 업로드 — fetch 와 달리 업로드 진행률/중단을 지원.
+ * 로컬(같은 기기) 통신이라 네트워크 타임아웃/재시도는 두지 않는다.
+ * 실패 시 { type, status, message, body, raw } 형태로 reject (원인 파악용 상세 포함).
  */
-function uploadWithProgress(formData, { timeout, onProgress, registerAbort }) {
+function uploadWithProgress(formData, { onProgress, registerAbort }) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "/api/upload");
-    xhr.timeout = timeout;
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
@@ -36,18 +29,24 @@ function uploadWithProgress(formData, { timeout, onProgress, registerAbort }) {
         }
       } else {
         let message = `서버 오류 (${xhr.status})`;
+        let body = null;
         try {
-          const body = JSON.parse(xhr.responseText);
+          body = JSON.parse(xhr.responseText);
           if (body?.message) message = body.message;
         } catch {}
-        reject({ type: "http", status: xhr.status, message });
+        reject({
+          type: "http",
+          status: xhr.status,
+          message,
+          body,
+          raw: xhr.responseText,
+        });
       }
     };
 
+    // 요청 자체가 실패한 경우 (로컬이라 드묾) — 원인 파악용으로만 처리
     xhr.onerror = () =>
-      reject({ type: "network", message: "네트워크 연결에 실패했습니다." });
-    xhr.ontimeout = () =>
-      reject({ type: "timeout", message: "업로드 시간이 초과되었습니다." });
+      reject({ type: "request", message: "업로드 요청에 실패했습니다." });
     xhr.onabort = () => reject({ type: "abort", message: "업로드를 취소했습니다." });
 
     // 취소 핸들러 등록 (부모가 abort 할 수 있도록)
@@ -55,14 +54,6 @@ function uploadWithProgress(formData, { timeout, onProgress, registerAbort }) {
 
     xhr.send(formData);
   });
-}
-
-// 재시도해도 의미 있는 오류인지 (4xx 검증 오류는 재시도 무의미)
-function isRetryable(err) {
-  if (!err) return false;
-  if (err.type === "timeout" || err.type === "network") return true;
-  if (err.type === "http" && err.status >= 500) return true;
-  return false;
 }
 
 export default function TakeSelectPhoto() {
@@ -73,9 +64,7 @@ export default function TakeSelectPhoto() {
   // 업로드 상태 머신: idle | uploading | error
   const [status, setStatus] = useState("idle");
   const [progress, setProgress] = useState(0);
-  const [attempt, setAttempt] = useState(0); // 현재 시도 번호(1부터)
   const [errorMsg, setErrorMsg] = useState("");
-  const [isOnline, setIsOnline] = useState(true);
 
   const abortRef = useRef(null); // 현재 진행 중 업로드 중단 함수
   const cancelledRef = useRef(false); // 사용자가 취소했는지
@@ -88,18 +77,6 @@ export default function TakeSelectPhoto() {
     );
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPhotos(storedPhotos);
-  }, []);
-
-  // 온라인/오프라인 감지
-  useEffect(() => {
-    const update = () => setIsOnline(navigator.onLine);
-    update();
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
-    return () => {
-      window.removeEventListener("online", update);
-      window.removeEventListener("offline", update);
-    };
   }, []);
 
   const base64toFile = useCallback((base64Data, filename) => {
@@ -159,86 +136,58 @@ export default function TakeSelectPhoto() {
     [selectedIndexes, photos, base64toFile]
   );
 
-  // 자동 재시도를 포함한 업로드 실행
+  // 업로드 실행 (로컬 통신 — 단일 시도). 실패하면 콘솔에 원인을 상세히 남긴다.
   const runUpload = useCallback(
     async (uploadToGallery) => {
       cancelledRef.current = false;
       setStatus("uploading");
       setErrorMsg("");
+      setProgress(0);
 
-      let lastErr = null;
-
-      for (let i = 0; i <= MAX_AUTO_RETRIES; i++) {
-        if (cancelledRef.current) return;
-
-        // 오프라인이면 온라인 복구까지 잠시 대기
-        if (!navigator.onLine) {
-          setErrorMsg("네트워크 연결을 확인하는 중...");
-          await sleep(2000);
-          if (cancelledRef.current) return;
-          if (!navigator.onLine) {
-            lastErr = { type: "network", message: "오프라인 상태입니다." };
-            continue;
-          }
-        }
-
-        setAttempt(i + 1);
-        setProgress(0);
-        setErrorMsg("");
-
-        const formData = buildFormData(uploadToGallery);
-        if (!formData) {
-          setStatus("idle");
-          alert("정확히 4개의 사진을 선택해야 합니다.");
-          return;
-        }
-
-        try {
-          const data = await uploadWithProgress(formData, {
-            timeout: UPLOAD_TIMEOUT_MS,
-            onProgress: setProgress,
-            registerAbort: (fn) => (abortRef.current = fn),
-          });
-
-          if (data?.result === false) {
-            // 서버가 명시적으로 실패를 반환 (예: 세션 만료) — 재시도 무의미
-            setStatus("error");
-            setErrorMsg(data.message || "업로드에 실패했습니다.");
-            return;
-          }
-
-          // 성공
-          setProgress(100);
-          const sessionId = localStorage.getItem("session");
-          router.push(`/download?session=${sessionId}`);
-          return;
-        } catch (err) {
-          lastErr = err;
-
-          if (err?.type === "abort" || cancelledRef.current) {
-            setStatus("idle");
-            return;
-          }
-
-          if (isRetryable(err) && i < MAX_AUTO_RETRIES) {
-            const wait = RETRY_BACKOFF_MS[i] ?? 5000;
-            setErrorMsg(
-              `${err.message} 잠시 후 다시 시도합니다... (${i + 1}/${MAX_AUTO_RETRIES})`
-            );
-            await sleep(wait);
-            continue;
-          }
-
-          // 재시도 불가하거나 재시도 소진
-          break;
-        }
+      const formData = buildFormData(uploadToGallery);
+      if (!formData) {
+        setStatus("idle");
+        alert("정확히 4개의 사진을 선택해야 합니다.");
+        return;
       }
 
-      setStatus("error");
-      setErrorMsg(
-        (lastErr?.message || "업로드에 실패했습니다.") +
-          " 네트워크 상태를 확인한 뒤 다시 시도해주세요."
-      );
+      try {
+        const data = await uploadWithProgress(formData, {
+          onProgress: setProgress,
+          registerAbort: (fn) => (abortRef.current = fn),
+        });
+
+        if (data?.result === false) {
+          // 서버가 명시적으로 실패를 반환 (예: 세션 만료, 파일 처리 오류)
+          console.error("[업로드 실패] 서버가 실패 응답을 반환했습니다:", data);
+          setStatus("error");
+          setErrorMsg(data.message || "업로드에 실패했습니다.");
+          return;
+        }
+
+        // 성공
+        setProgress(100);
+        const sessionId = localStorage.getItem("session");
+        router.push(`/download?session=${sessionId}`);
+      } catch (err) {
+        if (err?.type === "abort" || cancelledRef.current) {
+          setStatus("idle");
+          return;
+        }
+
+        // 무슨 문제인지 콘솔에 상세 로그 출력 (디버깅용)
+        console.error("[업로드 실패] 원인:", {
+          type: err?.type,
+          status: err?.status,
+          message: err?.message,
+          serverBody: err?.body,
+          rawResponse: err?.raw,
+          error: err,
+        });
+
+        setStatus("error");
+        setErrorMsg(err?.message || "업로드에 실패했습니다.");
+      }
     },
     [buildFormData, router]
   );
@@ -281,13 +230,6 @@ export default function TakeSelectPhoto() {
       <div className={styles.page}>
         {/* <Snowfall color="#82C3D9" /> */}
 
-        {/* 오프라인 배너 */}
-        {!isOnline && (
-          <div style={ovl.offlineBanner}>
-            ⚠️ 인터넷 연결이 끊겼습니다. 연결되면 자동으로 진행됩니다.
-          </div>
-        )}
-
         <div className={styles.container}>
           {photos.slice(0, 6).map((photo, idx) => (
             <div
@@ -327,16 +269,12 @@ export default function TakeSelectPhoto() {
           <div style={ovl.card}>
             <div style={ovl.spinner} />
             <div style={ovl.title}>사진을 업로드하고 있어요</div>
-            <div style={ovl.subtitle}>
-              {attempt > 1 ? `재시도 중 (${attempt - 1}/${MAX_AUTO_RETRIES})` : "잠시만 기다려주세요"}
-            </div>
+            <div style={ovl.subtitle}>잠시만 기다려주세요</div>
 
             <div style={ovl.progressTrack}>
               <div style={{ ...ovl.progressBar, width: `${progress}%` }} />
             </div>
             <div style={ovl.progressText}>{progress}%</div>
-
-            {errorMsg && <div style={ovl.hint}>{errorMsg}</div>}
 
             <button style={ovl.cancelBtn} onClick={handleCancel}>
               취소
@@ -382,19 +320,6 @@ export default function TakeSelectPhoto() {
 
 // 기존 CSS 모듈을 건드리지 않도록 오버레이는 인라인 스타일로 분리
 const ovl = {
-  offlineBanner: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    padding: "10px 16px",
-    background: "#FF6B6B",
-    color: "#fff",
-    textAlign: "center",
-    fontSize: 14,
-    zIndex: 3000,
-    boxSizing: "border-box",
-  },
   backdrop: {
     position: "fixed",
     inset: 0,
@@ -455,12 +380,6 @@ const ovl = {
     color: "#555",
     marginTop: 8,
     fontWeight: 600,
-  },
-  hint: {
-    fontSize: 12,
-    color: "#FF6B6B",
-    marginTop: 14,
-    lineHeight: 1.5,
   },
   cancelBtn: {
     marginTop: 22,

@@ -145,7 +145,7 @@ export default function Frame() {
                 window.location.href = "/n_select";
               }}
             >
-              블루 프레임
+              자율 프레임
             </div>
             <div
               className={styles.original}
@@ -153,7 +153,7 @@ export default function Frame() {
                 window.location.href = "/n_select";
               }}
             >
-              Blue →
+              Free →
             </div>
           </div>
         </div>
