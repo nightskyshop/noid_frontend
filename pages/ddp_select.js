@@ -18,7 +18,7 @@ export default function DdpSelect() {
   return (
     <>
       <Head>
-        <title>서울진로진학박람회 프레임</title>
+        <title>서울진로직업박람회 프레임</title>
         <meta charSet="UTF-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -28,7 +28,7 @@ export default function DdpSelect() {
         <div className={styles["rectangle-2"]}></div>
 
         <div className={styles["ddp-text"]}>
-          <div className={styles._2025}>2026 서울진로진학박람회</div>
+          <div className={styles._2025}>2026 서울진로직업박람회</div>
           <div className={styles.ddp}>프레임을 선택해보세요.</div>
         </div>
 

@@ -67,10 +67,21 @@
   width: 323.63px;
   height: 479px;
   position: absolute;
-  left: 798px;
+  left: 574px;
   top: 363px;
   object-fit: cover;
   aspect-ratio: 323.63/479;
+  cursor: pointer;
+}
+.blue2 {
+  width: 323.63px;
+  height: 479px;
+  position: absolute;
+  left: 1024px;
+  top: 363px;
+  object-fit: cover;
+  aspect-ratio: 323.63/479;
+  cursor: pointer;
 }
 .select-page {
   position: absolute;

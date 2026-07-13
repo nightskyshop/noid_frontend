@@ -91,7 +91,7 @@ export default function Frame() {
                 window.location.href = "/ddp_select";
               }}
             >
-              서울진로진학박람회
+              서울진로직업박람회
             </div>
             <div
               className={styles.ddp}
@@ -99,7 +99,7 @@ export default function Frame() {
                 window.location.href = "/ddp_select";
               }}
             >
-              Christmas →
+              Seoul →
             </div>
             <Image
               className={styles.seoulddp}
@@ -121,8 +121,8 @@ export default function Frame() {
             ></div>
             <Image
               className={styles.green}
-              src="/images/dankook_mbti.png"
-              alt="dankook_mbti_green"
+              src="/images/blue0.png"
+              alt="blue0_back"
               width={105}
               height={156}
               onClick={() => {
@@ -131,8 +131,8 @@ export default function Frame() {
             />
             <Image
               className={styles.blue}
-              src="/images/dankook_mbti.png"
-              alt="dankook_mbti_blue"
+              src="/images/blue2.png"
+              alt="blue2_front"
               width={105}
               height={156}
               onClick={() => {
@@ -145,7 +145,7 @@ export default function Frame() {
                 window.location.href = "/n_select";
               }}
             >
-              교장님 프레임
+              블루 프레임
             </div>
             <div
               className={styles.original}
@@ -153,7 +153,7 @@ export default function Frame() {
                 window.location.href = "/n_select";
               }}
             >
-              Waiting →
+              Blue →
             </div>
           </div>
         </div>
