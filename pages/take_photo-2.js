@@ -65,18 +65,29 @@ export default function TakePhoto2() {
     }, 1000);
   }, []);
 
+  // 촬영 완료 처리: 버튼 활성화를 먼저 하고 저장은 실패해도 흐름이 막히지 않게 한다.
+  // (고해상도 사진 6장을 localStorage 에 넣으면 용량 초과로 setItem 이 throw 될 수 있음)
+  const finishCapture = useCallback(() => {
+    setCounterText("촬영 완료!");
+    setButtonActive(true);
+    try {
+      localStorage.setItem(
+        "capturedPhotos",
+        JSON.stringify(capturedPhotosRef.current)
+      );
+    } catch (e) {
+      console.error("사진 저장 실패(용량 초과 등):", e);
+      setError("사진 저장 용량을 초과했습니다. 다시 시도해주세요.");
+    }
+  }, []);
+
   const takePhoto = useCallback(async () => {
     const videoEl = videoRef.current;
     if (!videoEl) return;
 
     const currentIndex = photosTakenRef.current;
     if (currentIndex >= 6) {
-      setCounterText("촬영 완료!");
-      localStorage.setItem(
-        "capturedPhotos",
-        JSON.stringify(capturedPhotosRef.current)
-      );
-      setButtonActive(true);
+      finishCapture();
       return;
     }
 
@@ -116,7 +127,8 @@ export default function TakePhoto2() {
       canvasHeight
     );
 
-    const dataURL = canvas.toDataURL("image/png");
+    // JPEG 로 저장해 용량을 줄인다(localStorage 한도 초과 방지). 서버 합성도 JPEG 지원.
+    const dataURL = canvas.toDataURL("image/jpeg", 0.9);
     capturedPhotosRef.current = [...capturedPhotosRef.current, dataURL];
     setThumbs((prev) => {
       const next = [...prev];
@@ -136,14 +148,9 @@ export default function TakePhoto2() {
         nextCount
       );
     } else {
-      setCounterText("촬영 완료!");
-      localStorage.setItem(
-        "capturedPhotos",
-        JSON.stringify(capturedPhotosRef.current)
-      );
-      setButtonActive(true);
+      finishCapture();
     }
-  }, [flashEffect, startCountdown]);
+  }, [flashEffect, startCountdown, finishCapture]);
 
   // 재귀 호출이 항상 최신 takePhoto 를 가리키도록 ref 갱신
   useEffect(() => {
