@@ -1,7 +1,8 @@
 import Head from "next/head";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import styles from "../styles/take_photo-1.module.css";
+import { getCameraStream, attachStream, cameraErrorMessage } from "../lib/camera";
 // import Snowfall from "react-snowfall";
 
 export default function TakePhoto1() {
@@ -9,42 +10,33 @@ export default function TakePhoto1() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
+  const [error, setError] = useState("");
 
   const setupCamera = useCallback(async () => {
     const videoEl = videoRef.current;
     const canvasEl = canvasRef.current;
-    if (!videoEl || !canvasEl) return null;
+    if (!videoEl || !canvasEl) return;
 
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoEl.srcObject = stream;
-
-    await new Promise((resolve, reject) => {
-      videoEl.onloadedmetadata = () => {
-        videoEl.play();
-        canvasEl.width = videoEl.videoWidth || canvasEl.clientWidth;
-        canvasEl.height = videoEl.videoHeight || canvasEl.clientHeight;
-        resolve();
-      };
-      videoEl.onerror = reject;
-    });
-
+    const stream = await getCameraStream({ video: true, audio: false });
     streamRef.current = stream;
-    return stream;
+
+    await attachStream(videoEl, stream, (w, h) => {
+      canvasEl.width = w || canvasEl.clientWidth;
+      canvasEl.height = h || canvasEl.clientHeight;
+    });
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
     (async () => {
       try {
         await setupCamera();
       } catch (err) {
-        console.error(err);
+        console.error("카메라 초기화 실패:", err?.name, err?.message, err);
+        setError(cameraErrorMessage(err));
       }
     })();
 
     return () => {
-      cancelled = true;
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
@@ -83,6 +75,23 @@ export default function TakePhoto1() {
             촬영 시작하기 →
           </div>
         </div>
+
+        {error && (
+          <p
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 24,
+              textAlign: "center",
+              color: "#d32f2f",
+              fontSize: 18,
+              padding: "0 20px",
+            }}
+          >
+            {error}
+          </p>
+        )}
       </div>
     </>
   );

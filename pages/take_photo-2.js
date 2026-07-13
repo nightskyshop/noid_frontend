@@ -2,6 +2,7 @@ import Head from "next/head";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import styles from "../styles/take_photo-2.module.css";
+import { getCameraStream, attachStream, cameraErrorMessage } from "../lib/camera";
 // import Snowfall from "react-snowfall";
 
 export default function TakePhoto2() {
@@ -9,10 +10,8 @@ export default function TakePhoto2() {
   const videoRef = useRef(null);
   const overlayRef = useRef(null);
   const flashRef = useRef(null);
-  const animationRef = useRef(null);
   const streamRef = useRef(null);
 
-  const [scriptReady, setScriptReady] = useState(false);
   const [counterText, setCounterText] = useState("잠시만 기다려 주세요...");
   const [error, setError] = useState("");
   const [photosTaken, setPhotosTaken] = useState(0);
@@ -20,9 +19,9 @@ export default function TakePhoto2() {
   const [buttonActive, setButtonActive] = useState(false);
 
   const capturedPhotosRef = useRef([]);
-  const faceApiRef = useRef(null);
   const photosTakenRef = useRef(0);
   const sessionCreatedRef = useRef(false);
+  const takePhotoRef = useRef(null); // 재귀 호출용 (항상 최신 takePhoto 참조)
 
   const flashEffect = useCallback(() => {
     const flash = flashRef.current;
@@ -38,56 +37,13 @@ export default function TakePhoto2() {
     const overlayEl = overlayRef.current;
     if (!videoEl || !overlayEl) return;
 
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoEl.srcObject = stream;
-
-    await new Promise((resolve, reject) => {
-      videoEl.onloadedmetadata = () => {
-        videoEl.play();
-        overlayEl.width = videoEl.videoWidth || overlayEl.clientWidth;
-        overlayEl.height = videoEl.videoHeight || overlayEl.clientHeight;
-        resolve();
-      };
-      videoEl.onerror = reject;
-    });
-
+    const stream = await getCameraStream({ video: true, audio: false });
     streamRef.current = stream;
-  }, []);
 
-  const loadModels = useCallback(async () => {
-    const faceapi = faceApiRef.current;
-    if (!faceapi) {
-      throw new Error("face-api.js 로드 실패");
-    }
-    const modelUrl = "/models";
-    await faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl);
-    await faceapi.nets.faceLandmark68TinyNet.loadFromUri(modelUrl);
-  }, []);
-
-  const startFaceLoop = useCallback(() => {
-    const videoEl = videoRef.current;
-    const overlayEl = overlayRef.current;
-    const faceapi = faceApiRef.current;
-    if (!videoEl || !overlayEl || !faceapi) return;
-
-    const ctx = overlayEl.getContext("2d");
-    const options = new faceapi.TinyFaceDetectorOptions({
-      inputSize: 256,
-      scoreThreshold: 0.5,
+    await attachStream(videoEl, stream, (w, h) => {
+      overlayEl.width = w || overlayEl.clientWidth;
+      overlayEl.height = h || overlayEl.clientHeight;
     });
-
-    const loop = async () => {
-      if (videoEl.readyState === videoEl.HAVE_ENOUGH_DATA) {
-        await faceapi
-          .detectSingleFace(videoEl, options)
-          .withFaceLandmarks(true);
-
-        ctx.clearRect(0, 0, overlayEl.width, overlayEl.height);
-      }
-      animationRef.current = requestAnimationFrame(loop);
-    };
-
-    loop();
   }, []);
 
   const startCountdown = useCallback((seconds, onFinish, currentIndex) => {
@@ -175,7 +131,7 @@ export default function TakePhoto2() {
       startCountdown(
         8,
         () => {
-          takePhoto();
+          takePhotoRef.current?.();
         },
         nextCount
       );
@@ -189,28 +145,14 @@ export default function TakePhoto2() {
     }
   }, [flashEffect, startCountdown]);
 
-  // face-api.js를 npm 패키지에서 동적으로 로드
+  // 재귀 호출이 항상 최신 takePhoto 를 가리키도록 ref 갱신
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const faceapi = await import("face-api.js");
-        if (!mounted) return;
-        faceApiRef.current = faceapi;
-        setScriptReady(true);
-      } catch (e) {
-        console.error("face-api.js 로드 실패:", e);
-        setError("face-api.js를 불러오지 못했습니다.");
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+    takePhotoRef.current = takePhoto;
+  }, [takePhoto]);
 
   // 세션 생성은 한 번만 실행
   useEffect(() => {
-    if (!scriptReady || sessionCreatedRef.current) return;
+    if (sessionCreatedRef.current) return;
     const frame = router.query.frame ?? "";
     if (!frame) return;
 
@@ -235,18 +177,15 @@ export default function TakePhoto2() {
         alert("session 생성 중 오류 발생.");
         sessionCreatedRef.current = false; // 실패 시 재시도 가능하도록
       });
-  }, [scriptReady, router.query.frame]);
+  }, [router.query.frame]);
 
   // 카메라 초기화 및 촬영 시작
   useEffect(() => {
-    if (!scriptReady) return;
     let cancelled = false;
 
     (async () => {
       try {
         await setupCamera();
-        await loadModels();
-        await startFaceLoop();
 
         // 5초 대기 후 첫 카운트다운 및 촬영 시작
         setTimeout(() => {
@@ -255,46 +194,30 @@ export default function TakePhoto2() {
           startCountdown(
             8,
             () => {
-              takePhoto();
+              takePhotoRef.current?.();
             },
             0
           );
         }, 5000);
       } catch (e) {
-        console.error("초기화 실패:", e);
-        setCounterText("초기화 실패");
-        setError("카메라 또는 얼굴 인식 초기화에 실패했습니다.");
+        console.error("카메라 초기화 실패:", e?.name, e?.message, e);
+        setCounterText("카메라를 열 수 없어요");
+        setError(cameraErrorMessage(e));
       }
     })();
 
     return () => {
       cancelled = true;
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((t) => t.stop());
       }
     };
-  }, [
-    loadModels,
-    setupCamera,
-    startCountdown,
-    startFaceLoop,
-    scriptReady,
-    takePhoto,
-  ]);
+  }, [setupCamera, startCountdown]);
 
-  // 촬영이 끝나면(6장 저장 완료) CPU 부하가 큰 얼굴 인식 루프와 카메라를 즉시 멈춘다.
-  // 이걸 계속 돌리면 "저장 중" 화면에서 페이지가 멈춘 것처럼 보이고 버튼도 잘 안 눌린다.
-  // 정지 후 다음 페이지(사진 선택)로 자동 이동한다.
+  // 촬영이 끝나면(6장 저장 완료) 카메라를 멈추고 다음 페이지(사진 선택)로 자동 이동한다.
   useEffect(() => {
     if (!buttonActive) return;
 
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-      animationRef.current = null;
-    }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
